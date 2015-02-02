@@ -23,6 +23,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 #import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
 #import "SOMessage.h"
 
 #define kBubbleTopMargin 0
@@ -35,6 +36,7 @@
 
 @optional
 - (void)messageCell:(SOMessageCell *)cell didTapMedia:(NSData *)media;
+- (void)messageCell:(SOMessageCell *)cell didTapMap:(CLLocationCoordinate2D)coordinate;
 
 @end
 
@@ -51,7 +53,7 @@
 @property (strong, nonatomic) UILabel *timeLabel; //appears while dragging cell
 @property (strong, nonatomic) UIImageView *mediaImageView;
 @property (strong, nonatomic) UIView *mediaOverlayView; // For video only
-
+@property (strong, nonatomic) MKMapView *mapView;
 @property (strong, nonatomic) UIImageView *balloonImageView;
 
 @property (strong, nonatomic) UIPanGestureRecognizer *panGesture;
@@ -83,7 +85,7 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier messageMaxWidth:(CGFloat)messageMaxWidth;
 - (void)setMediaImageViewSize:(CGSize)size;
 - (void)setUserImageViewSize:(CGSize)size;
-
+- (void)setMapViewSize:(CGSize)size;
 - (void)adjustCell;
 
 @end
