@@ -101,11 +101,20 @@
     [self addSubview:self.sendButton];
     
     self.mediaButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.mediaButton.backgroundColor = [UIColor redColor];
     [self.mediaButton addTarget:self action:@selector(mediaTapped:) forControlEvents:UIControlEventTouchUpInside];
     self.mediaButton.contentMode = UIViewContentModeScaleAspectFit;
     self.mediaButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
     self.mediaButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
     [self addSubview:self.mediaButton];
+    
+    self.locationButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.locationButton.backgroundColor = [UIColor blueColor];
+    [self.locationButton addTarget:self action:@selector(locationTapped:) forControlEvents:UIControlEventTouchUpInside];
+    self.locationButton.contentMode = UIViewContentModeScaleAspectFit;
+    self.locationButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.locationButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+    [self addSubview:self.locationButton];
     
     self.separatorView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, 0.5f)];
     self.separatorView.backgroundColor = [UIColor lightGrayColor];
@@ -120,8 +129,11 @@
     [self.sendButton setTitle:NSLocalizedString(@"Send", nil) forState:UIControlStateNormal];
     self.sendButton.frame = CGRectMake(0, 0, 70, self.textInitialHeight - self.textTopMargin - self.textBottomMargin);
     
+    self.locationButton.frame = CGRectMake(0,0,50,24);
+    
     [self.mediaButton setImage:[UIImage imageNamed:@"attachment.png"] forState:UIControlStateNormal];
-    self.mediaButton.frame = CGRectMake(0, 0, 50, 24);
+    self.mediaButton.frame = CGRectMake(self.locationButton.frame.origin.x + self.locationButton.frame.size.width + self.textleftMargin, 0, 50, 24);
+    
     
     [self adjustInputView];
 }
@@ -135,12 +147,12 @@
     
     if (!self.mediaButton.hidden) {
         CGRect mediaFrame = self.mediaButton.frame;
-        mediaFrame.origin = CGPointMake(0, 0);
         self.mediaButton.frame = mediaFrame;
         self.mediaButton.center = CGPointMake(self.mediaButton.center.x, self.textInitialHeight/2);
     } else {
         self.mediaButton.frame = CGRectZero;
     }
+    self.locationButton.center = CGPointMake(self.locationButton.center.x, self.textInitialHeight/2);
     
     CGRect sendFrame = self.sendButton.frame;
     sendFrame.origin = CGPointMake(self.frame.size.width - sendFrame.size.width, 0);
@@ -149,7 +161,7 @@
     
     CGRect txtBgFrame = self.textBgImageView.frame;
     txtBgFrame.origin = CGPointMake(self.mediaButton.frame.origin.x + self.mediaButton.frame.size.width + self.textleftMargin, self.textTopMargin);
-    txtBgFrame.size = CGSizeMake(self.frame.size.width - self.mediaButton.frame.size.width - self.textleftMargin - self.sendButton.frame.size.width - self.textRightMargin, self.textInitialHeight - self.textTopMargin - self.textBottomMargin);
+    txtBgFrame.size = CGSizeMake(self.frame.size.width -self.mediaButton.frame.origin.x -self.mediaButton.frame.size.width - self.textleftMargin - self.sendButton.frame.size.width - self.textRightMargin, self.textInitialHeight - self.textTopMargin - self.textBottomMargin);
 
     self.textBgImageView.frame = txtBgFrame;
     
@@ -255,6 +267,11 @@
     }
 }
 
+- (void)locationTapped:(id)sender{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageInputViewDidSelectLocationButton:)]) {
+        [self.delegate messageInputViewDidSelectLocationButton:self];
+    }
+}
 #pragma mark - private Methods
 - (void)adjustTextViewSize
 {

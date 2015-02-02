@@ -23,6 +23,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 #import <Foundation/Foundation.h>
+#import <MapKit/MapKit.h>
 #import "SOMessageType.h"
 
 @protocol SOMessage
@@ -46,6 +47,11 @@
  * Default thumbnail for media.
  */
 @property (strong, nonatomic) UIImage *thumbnail;
+
+/**
+ * Coordinate from map.
+ */
+@property (nonatomic) CLLocationCoordinate2D coordinate;
 
 /**
  * Message sent date

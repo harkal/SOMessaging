@@ -44,4 +44,9 @@
  */
 - (void)messageInputViewDidSelectMediaButton:(SOMessageInputView *)inputView;
 
+/**
+ * Called when user tap on attach location button
+ */
+- (void)messageInputViewDidSelectLocationButton:(SOMessageInputView *)inputView;
+
 @end

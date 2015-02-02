@@ -37,7 +37,7 @@
 @property (strong, nonatomic) SOPlaceholderedTextView *textView;
 @property (strong, nonatomic) UIButton *sendButton;
 @property (strong, nonatomic) UIButton *mediaButton;
-
+@property (strong, nonatomic) UIButton *locationButton;
 @property (strong, nonatomic) UIView *separatorView;
 
 @property (nonatomic, readonly) BOOL viewIsDragging;

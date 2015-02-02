@@ -93,6 +93,10 @@
  */
 - (CGSize)userImageSize;
 
+/**
+ * Size map's view
+ */
+- (CGSize)mapViewSize;
 
 
  @end

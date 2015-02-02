@@ -31,6 +31,7 @@
 }
 @property (nonatomic) CGSize mediaImageViewSize;
 @property (nonatomic) CGSize userImageViewSize;
+@property (nonatomic) CGSize mapViewSize;
 
 @end
 
@@ -98,6 +99,7 @@ static BOOL cellIsDragging;
     self.timeLabel = [[UILabel alloc] init];
     self.mediaImageView = [[UIImageView alloc] init];
     self.mediaOverlayView = [[UIView alloc] init];
+    self.mapView = [[MKMapView alloc] init];
     self.balloonImageView = [[UIImageView alloc] init];
 
     if (!CGSizeEqualToSize(self.userImageViewSize, CGSizeZero)) {
@@ -127,6 +129,15 @@ static BOOL cellIsDragging;
     
     self.mediaOverlayView.backgroundColor = [UIColor clearColor];
     [self.mediaImageView addSubview:self.mediaOverlayView];
+   
+    //mapView
+    if (!CGSizeEqualToSize(self.mapViewSize, CGSizeZero)) {
+        CGRect frame = self.mapView.frame;
+        frame.size = self.mapViewSize;
+        self.mapView.frame = frame;
+    }
+    UITapGestureRecognizer *tapMap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleMapTapped:)];
+    [self.mapView addGestureRecognizer:tapMap];
     
     self.textView.textColor = [UIColor whiteColor];
     self.textView.backgroundColor = [UIColor clearColor];
@@ -144,6 +155,7 @@ static BOOL cellIsDragging;
     [self.containerView addSubview:self.textView];
     [self.containerView addSubview:self.mediaImageView];
     [self.containerView addSubview:self.userImageView];
+    [self.containerView addSubview:self.mapView];
     
     [self.contentView addSubview:self.timeLabel];
     
@@ -160,6 +172,7 @@ static BOOL cellIsDragging;
     self.userImageView.hidden = YES;
     self.textView.hidden = YES;
     self.mediaImageView.hidden = YES;
+    self.mapView.hidden = YES;
 }
 
 - (void)setMediaImageViewSize:(CGSize)size
@@ -178,6 +191,15 @@ static BOOL cellIsDragging;
     self.userImageView.frame = frame;
 }
 
+- (void)setMapViewSize:(CGSize)size
+{
+    _mapViewSize = size;
+    CGRect frame = self.mapView.frame;
+    frame.size = size;
+    self.mapView.frame = frame;
+}
+
+
 - (void)setUserImage:(UIImage *)userImage
 {
     _userImage = userImage;
@@ -194,6 +216,11 @@ static BOOL cellIsDragging;
     }
 }
 
+- (void)handleMapTapped:(UITapGestureRecognizer *)tap{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(messageCell:didTapMap:)]) {
+        [self.delegate messageCell:self didTapMap:self.message.coordinate];
+    }
+}
 #pragma mark -
 - (void)setMessage:(id<SOMessage>)message
 {
@@ -220,6 +247,9 @@ static BOOL cellIsDragging;
         if (!CGSizeEqualToSize(self.userImageViewSize, CGSizeZero) && self.userImage) {
             self.userImageView.hidden = NO;
         }
+    } else if (self.message.type == SOMessageTypeMap) {
+        self.mapView.hidden = NO;
+        [self adjustForMapOnly];
     }
     
     self.containerView.autoresizingMask = self.message.fromMe ? UIViewAutoresizingFlexibleLeftMargin : UIViewAutoresizingFlexibleRightMargin;
@@ -436,6 +466,88 @@ static BOOL cellIsDragging;
     self.mediaImageView.layer.mask = layer;
     [self.mediaImageView setNeedsDisplay];
     
+    
+    // Adjusing time label
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"HH:mm"];
+    self.timeLabel.frame = CGRectZero;
+    self.timeLabel.text = [formatter stringFromDate:self.message.date];
+    
+    [self.timeLabel sizeToFit];
+    CGRect timeLabel = self.timeLabel.frame;
+    timeLabel.origin.x = self.contentView.frame.size.width + 5;
+    self.timeLabel.frame = timeLabel;
+    self.timeLabel.center = CGPointMake(self.timeLabel.center.x, self.containerView.center.y);
+}
+
+- (void)adjustForMapOnly{
+    CGFloat userImageViewLeftMargin = 3;
+
+    CGRect frame = CGRectZero;
+    frame.size = self.mapViewSize;
+    
+    if (!self.message.fromMe && self.userImage) {
+        frame.origin.x += userImageViewLeftMargin + self.userImageViewSize.width;
+    }
+    
+    self.mapView.frame = frame;
+    MKPointAnnotation *point = [[MKPointAnnotation alloc] init];
+    point.coordinate = self.message.coordinate;
+    [self.mapView addAnnotation:point];
+    [self.mapView showAnnotations:@[point] animated:NO];
+    self.mapView.scrollEnabled = NO;
+    self.mapView.zoomEnabled = NO;
+    
+    self.balloonImageView.frame = frame;
+    self.balloonImageView.backgroundColor = [UIColor clearColor];
+    self.balloonImageView.image = self.balloonImage;
+    
+    CGRect userRect = self.userImageView.frame;
+    
+    if (self.userImageView.autoresizingMask & UIViewAutoresizingFlexibleTopMargin) {
+        userRect.origin.y = frame.origin.y + frame.size.height - userRect.size.height;
+    } else {
+        userRect.origin.y = 0;
+    }
+    
+    if (self.message.fromMe) {
+        userRect.origin.x = frame.origin.x + userImageViewLeftMargin + frame.size.width;
+    } else {
+        userRect.origin.x = frame.origin.x - userImageViewLeftMargin - userRect.size.width;
+    }
+    self.userImageView.frame = userRect;
+    self.userImageView.image = self.userImage;
+    
+    CGRect frm = self.containerView.frame;
+    frm.origin.x = self.message.fromMe ? self.contentView.frame.size.width - frame.size.width - kBubbleRightMargin : kBubbleLeftMargin;
+    frm.origin.y = kBubbleTopMargin;
+    frm.size.width = frame.size.width;
+    if (!CGSizeEqualToSize(userRect.size, CGSizeZero) && self.userImage) {
+        self.userImageView.hidden = NO;
+        frm.size.width += userImageViewLeftMargin + userRect.size.width;
+        if (self.message.fromMe) {
+            frm.origin.x -= userImageViewLeftMargin + userRect.size.width;
+        }
+    }
+    
+    frm.size.height = frame.size.height;
+    if (frm.size.height < self.userImageViewSize.height) {
+        CGFloat delta = self.userImageViewSize.height - frm.size.height;
+        frm.size.height = self.userImageViewSize.height;
+        
+        for (UIView *sub in self.containerView.subviews) {
+            CGRect fr = sub.frame;
+            fr.origin.y += delta;
+            sub.frame = fr;
+        }
+    }
+    self.containerView.frame = frm;
+
+    //Masking mapView with balloon image
+    CALayer *layer = self.balloonImageView.layer;
+    layer.frame    = (CGRect){{0,0},self.balloonImageView.layer.frame.size};
+    self.mapView.layer.mask = layer;
+    [self.mapView setNeedsDisplay];
     
     // Adjusing time label
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];

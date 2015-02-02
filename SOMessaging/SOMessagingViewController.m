@@ -205,6 +205,9 @@
         cell = [[SOMessageCell alloc] initWithStyle:UITableViewCellStyleDefault
                                     reuseIdentifier:cellIdentifier
                                     messageMaxWidth:[self messageMaxWidth]];
+        [cell setMediaImageViewSize:[self mediaThumbnailSize]];
+        [cell setUserImageViewSize:[self userImageSize]];
+        [cell setMapViewSize:[self mapViewSize]];
     }
     [cell setMediaImageViewSize:[self mediaThumbnailSize]];
     [cell setUserImageViewSize:[self userImageSize]];
@@ -274,6 +277,13 @@
         
         height = size.height + kBubbleTopMargin + kBubbleBottomMargin;
         
+    } else if (message.type == SOMessageTypeMap) {
+        CGSize size = [self mapViewSize];
+        if (size.height < [self userImageSize].height) {
+            size.height = [self userImageSize].height;
+        }
+        height = size.height + kBubbleTopMargin + kBubbleBottomMargin;
+        
     } else {
         CGSize size = [self mediaThumbnailSize];
         if (size.height < [self userImageSize].height) {
@@ -338,6 +348,11 @@
 - (CGSize)userImageSize
 {
     return CGSizeMake(0, 0);
+}
+         
+-(CGSize)mapViewSize
+{
+    return CGSizeMake(90, 100);
 }
 
 #pragma mark - Public methods
@@ -449,6 +464,18 @@
         [[UIApplication sharedApplication] setStatusBarHidden:NO];
     }
 }
+
+- (void)messageCell:(SOMessageCell *)cell didTapMap:(CLLocationCoordinate2D)coordinate{
+    [self didSelectMap:coordinate inMessageCell:cell];
+}
+
+- (void)didSelectMap:(CLLocationCoordinate2D)coordinate inMessageCell:(SOMessageCell *)cell
+{
+    MKPlacemark* placeMark = [[MKPlacemark alloc] initWithCoordinate:coordinate addressDictionary:nil];
+    MKMapItem* destination =  [[MKMapItem alloc] initWithPlacemark:placeMark];
+    [destination openInMapsWithLaunchOptions:nil];
+}
+
 #pragma mark - Helper methods
 - (UIImage *)tintImage:(UIImage *)image withColor:(UIColor *)color
 {
