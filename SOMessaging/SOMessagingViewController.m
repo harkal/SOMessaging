@@ -362,7 +362,7 @@
     NSMutableArray *messages = [self messages];
     [messages addObject:message];
 
-    [self refreshMessages];
+    [self refreshMessages:YES];
 }
 
 - (void)receiveMessage:(id<SOMessage>) message
@@ -372,20 +372,22 @@
     NSMutableArray *messages = [self messages];
     [messages addObject:message];
 
-    [self refreshMessages];
+    [self refreshMessages:YES];
 }
 
-- (void)refreshMessages
+- (void)refreshMessages:(BOOL)scroll
 {
     self.conversation = [self grouppedMessages];
     [self.tableView reloadData];
     
-    NSInteger section = [self numberOfSectionsInTableView:self.tableView] - 1;
-    NSInteger row     = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
-
-    if (row >= 0) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
-        [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    if (scroll) {
+        NSInteger section = [self numberOfSectionsInTableView:self.tableView] - 1;
+        NSInteger row     = [self tableView:self.tableView numberOfRowsInSection:section] - 1;
+        
+        if (row >= 0) {
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+            [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+        }
     }
 }
 

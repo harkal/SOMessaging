@@ -51,6 +51,6 @@
 /**
  * Reloading datasource
  */
-- (void)refreshMessages;
+- (void)refreshMessages:(BOOL)scroll;
 
 @end
