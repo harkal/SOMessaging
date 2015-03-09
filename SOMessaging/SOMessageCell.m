@@ -93,14 +93,16 @@ static BOOL cellIsDragging;
         [self.timeLabel removeFromSuperview];
     }
     
-    self.userImageView = [[UIImageView alloc] init];
-    self.userImageView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-    self.textView = [[UITextView alloc] initWithFrame:CGRectMake(0, 0, self.messageMaxWidth, 0)];
-    self.timeLabel = [[UILabel alloc] init];
-    self.mediaImageView = [[UIImageView alloc] init];
-    self.mediaOverlayView = [[UIView alloc] init];
-    self.mapView = [[MKMapView alloc] init];
-    self.balloonImageView = [[UIImageView alloc] init];
+    if (!self.userImageView) {
+        self.userImageView = [[UIImageView alloc] init];
+        self.userImageView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+        self.textView = [[UITextView alloc] initWithFrame:CGRectMake(0, 0, self.messageMaxWidth, 0)];
+        self.timeLabel = [[UILabel alloc] init];
+        self.mediaImageView = [[UIImageView alloc] init];
+        self.mediaOverlayView = [[UIView alloc] init];
+        self.mapView = [[MKMapView alloc] init];
+        self.balloonImageView = [[UIImageView alloc] init];
+    }
 
     if (!CGSizeEqualToSize(self.userImageViewSize, CGSizeZero)) {
         CGRect frame = self.userImageView.frame;
